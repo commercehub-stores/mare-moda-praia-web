@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { currentCartId, ensureCartId } from "@/lib/cart.ts";
+import { currentCartId, ensureCartId, setBagOpen } from "@/lib/cart.ts";
 import { commerce } from "@/lib/store.ts";
 
 const text = (form: FormData, key: string) => {
@@ -10,13 +10,26 @@ const text = (form: FormData, key: string) => {
   return typeof value === "string" ? value.trim() : "";
 };
 
+/** Adds the chosen size and opens the bag drawer on the same page. */
 export async function addToCart(form: FormData) {
   const variantId = text(form, "variantId");
   const quantity = Math.max(1, Math.min(99, Number(text(form, "quantity")) || 1));
   if (!variantId) return;
   const cartId = await ensureCartId();
   await commerce.cart.addItem(cartId, { variantId, quantity });
-  redirect("/carrinho");
+  await setBagOpen(true);
+  revalidatePath("/", "layout");
+}
+
+/** "Comprar com Pix em 1 clique": adds the item and goes straight to checkout. */
+export async function buyNow(form: FormData) {
+  const variantId = text(form, "variantId");
+  const quantity = Math.max(1, Math.min(99, Number(text(form, "quantity")) || 1));
+  if (!variantId) return;
+  const cartId = await ensureCartId();
+  await commerce.cart.addItem(cartId, { variantId, quantity });
+  const { url } = await commerce.checkout.getCheckoutUrl(cartId);
+  redirect(url);
 }
 
 export async function updateQuantity(form: FormData) {
@@ -25,13 +38,30 @@ export async function updateQuantity(form: FormData) {
   const quantity = Math.max(0, Math.min(99, Number(text(form, "quantity")) || 0));
   if (!cartId || !itemId) return;
   await commerce.cart.updateItem(cartId, itemId, quantity);
-  revalidatePath("/carrinho");
+  revalidatePath("/", "layout");
+}
+
+export async function openBag() {
+  await setBagOpen(true);
+  revalidatePath("/", "layout");
+}
+
+export async function closeBag() {
+  await setBagOpen(false);
+  revalidatePath("/", "layout");
 }
 
 /** Redirect mode: the cart goes to the native VTEX checkout, where payment happens. */
 export async function goToCheckout() {
   const cartId = await currentCartId();
   if (!cartId) redirect("/carrinho");
+  await setBagOpen(false);
   const { url } = await commerce.checkout.getCheckoutUrl(cartId);
   redirect(url);
+}
+
+/** Demo newsletter: no list is connected yet, so the address is not stored anywhere. */
+export async function subscribe(form: FormData) {
+  const email = text(form, "email");
+  redirect(email.includes("@") ? "/?newsletter=ok#newsletter" : "/#newsletter");
 }

@@ -1,34 +1,42 @@
+import type { Metadata } from "next";
 import { ProductGrid } from "@/components/product-card.tsx";
+import { withImages } from "@/lib/catalog.ts";
+import { DEPARTMENT_ID } from "@/lib/mare.ts";
 import { commerce } from "@/lib/store.ts";
 
+export const metadata: Metadata = { title: "Busca" };
+
 interface Props {
-  searchParams: Promise<{ q?: string; ordem?: string }>;
+  searchParams: Promise<{ q?: string }>;
 }
 
-const SORTS = { relevancia: "relevance", "menor-preco": "price_asc", "maior-preco": "price_desc", novidades: "newest" } as const;
-
 export default async function SearchPage({ searchParams }: Props) {
-  const { q = "", ordem = "relevancia" } = await searchParams;
-  const sort = SORTS[ordem as keyof typeof SORTS] ?? "relevance";
-  const result = await commerce.search.search({ term: q.trim(), sort, limit: 24 });
+  const { q = "" } = await searchParams;
+  const term = q.trim();
+  const result = term ? await commerce.search.search({ term, filters: { category: [DEPARTMENT_ID] }, limit: 24 }).catch(() => null) : null;
+  const items = withImages(result?.items ?? []);
   return (
-    <div className="stack">
-      <h1>{q ? `Resultados para “${q}”` : "Todos os produtos"}</h1>
-      <form className="row" action="/busca">
-        <input type="hidden" name="q" value={q} />
-        <label className="muted" htmlFor="ordem">
-          Ordenar por
-        </label>
-        <select id="ordem" name="ordem" defaultValue={ordem} className="input" style={{ flex: "none", width: "auto" }}>
-          <option value="relevancia">Relevância</option>
-          <option value="menor-preco">Menor preço</option>
-          <option value="maior-preco">Maior preço</option>
-          <option value="novidades">Novidades</option>
-        </select>
-        <button className="button button-ghost">Aplicar</button>
-        <span className="muted">{result.total} produtos</span>
-      </form>
-      <ProductGrid products={result.items} empty="Nenhum produto encontrado." />
-    </div>
+    <>
+      <div className="plp-head page">
+        <h1 className="display" style={{ fontSize: 48, margin: 0 }}>
+          {term ? `“${term}”` : "Buscar"}
+        </h1>
+        <div className="shipping-box" style={{ maxWidth: 560 }}>
+          <form action="/busca" role="search">
+            <label htmlFor="q" className="sr-only">
+              Buscar produtos
+            </label>
+            <input id="q" name="q" defaultValue={term} placeholder="Short, sunga, camisa de linho…" autoFocus={!term} />
+            <button>Buscar</button>
+          </form>
+        </div>
+        {result && (
+          <p className="muted" style={{ margin: 0 }}>
+            {items.length} {items.length === 1 ? "produto" : "produtos"}
+          </p>
+        )}
+      </div>
+      <div className="page">{term && <ProductGrid products={items} empty="Nada encontrado. Que tal procurar por short, sunga ou camisa?" />}</div>
+    </>
   );
 }

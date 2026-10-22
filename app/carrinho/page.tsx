@@ -3,22 +3,26 @@ import Link from "next/link";
 import { goToCheckout, updateQuantity } from "@/app/actions.ts";
 import { currentCart } from "@/lib/cart.ts";
 import { formatMoney, normalizeCep } from "@/lib/format.ts";
+import { pixPrice, splitLineName } from "@/lib/mare.ts";
 import { commerce } from "@/lib/store.ts";
 
-export const metadata: Metadata = { title: "Carrinho" };
+export const metadata: Metadata = { title: "Sacola" };
 
 interface Props {
   searchParams: Promise<{ cep?: string }>;
 }
 
+/** Full-page bag (the drawer covers most flows; this is the no-JS / shared-link fallback). */
 export default async function CartPage({ searchParams }: Props) {
   const cart = await currentCart();
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="stack">
-        <h1>Carrinho</h1>
+      <div className="plp-head page">
+        <h1 className="display" style={{ fontSize: 48, margin: 0 }}>
+          Sua sacola
+        </h1>
         <p className="empty">
-          Seu carrinho está vazio. <Link href="/">Ver produtos</Link>
+          Sua sacola está vazia. <Link href="/c/novidades">Ver novidades</Link>
         </p>
       </div>
     );
@@ -27,68 +31,67 @@ export default async function CartPage({ searchParams }: Props) {
   const quotes = cep ? await commerce.cart.estimateShipping(cart.id, { postalCode: cep, country: "BRA" }).catch(() => []) : null;
 
   return (
-    <div className="pdp">
-      <div className="stack">
-        <h1>Carrinho</h1>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Quantidade</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cart.items.map((item) => (
-              <tr key={item.id}>
-                <td>{item.name ?? `SKU ${item.variantId}`}</td>
-                <td>
-                  <form action={updateQuantity} className="row">
-                    <input type="hidden" name="itemId" value={item.id} />
-                    <input name="quantity" type="number" min={0} max={99} defaultValue={item.quantity} className="input" style={{ flex: "none", width: 72 }} aria-label="Quantidade" />
-                    <button className="button button-ghost">Atualizar</button>
-                  </form>
-                </td>
-                <td>{formatMoney(item.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="pdp page" style={{ paddingTop: 40 }}>
+      <div>
+        <h1 className="display" style={{ fontSize: 48, margin: 0 }}>
+          Sua sacola
+        </h1>
+        {cart.items.map((item) => {
+          const { title, size } = splitLineName(item.name);
+          return (
+            <div key={item.id} className="line">
+              <img src={item.imageUrl ?? ""} alt="" />
+              <div className="line-info">
+                <strong>{title}</strong>
+                {size && <span className="muted">Tamanho {size}</span>}
+                <form action={updateQuantity} className="line-row">
+                  <input type="hidden" name="itemId" value={item.id} />
+                  <label className="muted">
+                    Qtd.{" "}
+                    <input name="quantity" type="number" min={0} max={99} defaultValue={item.quantity} style={{ width: 56 }} />
+                  </label>
+                  <button className="line-remove">Atualizar</button>
+                  <strong>{formatMoney(item.total)}</strong>
+                </form>
+              </div>
+            </div>
+          );
+        })}
       </div>
-      <aside className="summary" aria-label="Resumo">
-        <span className="row">
-          Subtotal <strong style={{ marginLeft: "auto" }}>{formatMoney(cart.subtotal)}</strong>
-        </span>
+      <aside className="shipping-box" aria-label="Resumo">
+        <div className="sum-row">
+          <span>Subtotal</span>
+          <strong>{formatMoney(cart.subtotal)}</strong>
+        </div>
         {cart.discount.amountCents > 0 && (
-          <span className="row">
-            Descontos <strong style={{ marginLeft: "auto" }}>−{formatMoney(cart.discount)}</strong>
-          </span>
+          <div className="sum-row">
+            <span>Descontos</span>
+            <strong>−{formatMoney(cart.discount)}</strong>
+          </div>
         )}
-        <form className="row" action="/carrinho">
-          <input name="cep" className="input" placeholder="CEP" defaultValue={cep ?? ""} aria-label="CEP para calcular o frete" />
-          <button className="button button-ghost">Calcular frete</button>
+        <form action="/carrinho">
+          <input name="cep" placeholder="CEP" defaultValue={cep ?? ""} aria-label="CEP para calcular o frete" />
+          <button>Calcular</button>
         </form>
         {quotes &&
           (quotes.length === 0 ? (
             <span className="muted">Nenhuma opção de entrega para este CEP.</span>
           ) : (
             quotes.map((q) => (
-              <span key={q.id} className="row">
-                {q.service} · {q.estimatedBusinessDays} dias úteis <strong style={{ marginLeft: "auto" }}>{formatMoney(q.price)}</strong>
-              </span>
+              <div key={q.id} className="ship-line">
+                <strong>{q.service}</strong>
+                <span>{q.estimatedBusinessDays} dias úteis</span>
+                <strong>{formatMoney(q.price)}</strong>
+              </div>
             ))
           ))}
-        <span className="row">
-          Total <strong style={{ marginLeft: "auto" }}>{formatMoney(cart.total)}</strong>
-        </span>
-        <form action={goToCheckout}>
-          <button className="button button-accent" style={{ width: "100%", justifyContent: "center" }}>
-            Finalizar compra
-          </button>
+        <div className="sum-row pix-total">
+          <span>Total no Pix</span>
+          <strong>{formatMoney(pixPrice(cart.total))}</strong>
+        </div>
+        <form action={goToCheckout} style={{ display: "block" }}>
+          <button className="btn btn-coral btn-block">Finalizar compra</button>
         </form>
-        <span className="muted" style={{ fontSize: 13 }}>
-          O pagamento acontece no checkout da VTEX.
-        </span>
       </aside>
     </div>
   );
