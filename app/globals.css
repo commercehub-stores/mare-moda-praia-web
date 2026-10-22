@@ -80,6 +80,32 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .header[data-overlay]:hover .nav-sale, .header[data-overlay]:focus-within .nav-sale { color: var(--coral) !important; }
 .header[data-overlay]:hover img, .header[data-overlay]:focus-within img { filter: none; }
 
+/* Mega menu (desktop): Moda praia ▾ / Roupas ▾ open a full-width panel under the header */
+.mega-item { display: flex; }
+.mega-trigger { display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: none; font: inherit; font-weight: 500; color: inherit; cursor: pointer; }
+.mega-trigger svg { transition: transform 0.2s ease; }
+.mega-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.header[data-overlay] .mega-trigger { color: var(--white); transition: color 0.3s ease; }
+.header[data-overlay]:hover .mega-trigger, .header[data-overlay]:focus-within .mega-trigger { color: var(--ink); }
+.mega-panel { position: absolute; left: 0; right: 0; top: 100%; background: var(--shell); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); box-shadow: 0 24px 40px -24px rgba(10, 26, 33, 0.25); animation: mega-in 0.18s ease-out; color: var(--ink); }
+.mega-panel[hidden] { display: none; }
+@keyframes mega-in { from { opacity: 0; transform: translateY(-6px); } }
+.mega-inner { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; padding-top: 36px; padding-bottom: 40px; }
+.mega-groups { display: grid; gap: 32px; }
+.mega-group { display: flex; flex-direction: column; gap: 14px; }
+.header .mega-title { font-family: var(--display); font-size: 24px; font-weight: 400; color: var(--ink) !important; padding: 0; }
+.mega-group ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.header .mega-group li a { font-size: 14px; color: var(--muted) !important; padding: 0; transition: color 0.15s ease; }
+.header .mega-group li a:hover { color: var(--ink) !important; }
+.header .mega-group li:last-child a { color: var(--ink) !important; font-weight: 700; }
+.header .mega-panel a::after { display: none; }
+.mega-feature { position: relative; display: block; height: 240px; border-radius: 16px; overflow: hidden; color: var(--white) !important; padding: 0 !important; }
+.header .mega-feature img { width: 100%; height: 100%; object-fit: cover; filter: none !important; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.mega-feature:hover img { transform: scale(1.04); }
+.mega-feature-text { position: absolute; inset: auto 0 0; display: flex; flex-direction: column; gap: 4px; padding: 20px; background: linear-gradient(transparent, rgba(10, 26, 33, 0.8)); font-size: 13px; }
+.mega-feature-text strong { font-size: 26px; font-weight: 400; }
+.mega-feature-cta { font-weight: 700; margin-top: 4px; }
+
 /* Hero: video filling 100% of the first fold (under the transparent header), parallax via HeroVideo */
 .hero { position: relative; height: calc(100vh - var(--announce)); height: calc(100svh - var(--announce)); min-height: 420px; margin-top: calc(-1 * var(--header-h)); overflow: hidden; background: var(--deep); }
 .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; will-change: transform; transform: scale(1.06); }

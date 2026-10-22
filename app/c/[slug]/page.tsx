@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/product-card.tsx";
 import { collectionProducts, withImages } from "@/lib/catalog.ts";
 import type { Product } from "@/lib/commerce/index.ts";
-import { COLLECTIONS, collectionBySlug, discountPercent, leadVariant, SIZE_ORDER, sizeOf } from "@/lib/mare.ts";
+import { COLLECTIONS, collectionBySlug, discountPercent, leadVariant, SIZE_ORDER, sizeOf, slugify } from "@/lib/mare.ts";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -185,13 +185,4 @@ export default async function CollectionPage({ params, searchParams }: Props) {
       </div>
     </>
   );
-}
-
-function slugify(s: string) {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }

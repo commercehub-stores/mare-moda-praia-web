@@ -5,10 +5,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { openBag } from "@/app/actions.ts";
 import { BagDrawer } from "@/components/bag-drawer.tsx";
+import { MegaNav } from "@/components/mega-nav.tsx";
 import { SiteHeader } from "@/components/site-header.tsx";
 import { BAG_OPEN_COOKIE, currentCart } from "@/lib/cart.ts";
 import { quickConfig } from "@/lib/config.ts";
-import { NAV } from "@/lib/mare.ts";
+import { MEGA_MENUS, MOBILE_NAV } from "@/lib/mare.ts";
 import "./globals.css";
 
 const fraunces = Fraunces({ subsets: ["latin"], axes: ["SOFT", "WONK", "opsz"], style: ["normal", "italic"], variable: "--font-fraunces", display: "swap" });
@@ -37,16 +38,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         </div>
         <SiteHeader>
           <div className="header-row page">
-            <nav className="nav" aria-label="Categorias">
-              {NAV.map((c) => (
-                <Link key={c.slug} href={`/c/${c.slug}`} className={c.slug === "sale" ? "nav-sale" : undefined}>
-                  {c.name}
-                </Link>
-              ))}
-              <Link href="/blog" className="nav-blog">
-                Diário
-              </Link>
-            </nav>
+            <MegaNav menus={MEGA_MENUS} />
             <Link href="/" className="logo" aria-label="Maré Moda Praia, página inicial">
               <span className="logo-word">maré</span>
               <span className="logo-tag">MODA PRAIA</span>
@@ -70,7 +62,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </div>
           </div>
           <nav className="nav-mobile" aria-label="Categorias (celular)">
-            {NAV.map((c) => (
+            {MOBILE_NAV.map((c) => (
               <Link key={c.slug} href={`/c/${c.slug}`} className={c.slug === "sale" ? "nav-sale" : undefined}>
                 {c.name}
               </Link>

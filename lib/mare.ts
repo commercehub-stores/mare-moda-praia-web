@@ -53,12 +53,79 @@ export const COLLECTIONS: Collection[] = [
     ],
   },
   { slug: "camisetas", name: "Camisetas", categoryId: "23", description: "Algodão leve e estampas autorais." },
-  { slug: "bermudas", name: "Bermudas", categoryId: "24", description: "Do jeans ao linho, para ir além da areia." },
-  { slug: "calcas", name: "Calças", categoryId: "25", description: "Corte reto e tecidos que respiram." },
+  {
+    slug: "bermudas",
+    name: "Bermudas",
+    categoryId: "24",
+    description: "Do jeans ao linho, para ir além da areia.",
+    chips: [
+      { label: "Casual", match: /casual/i },
+      { label: "Jeans", match: /jeans/i },
+    ],
+  },
+  {
+    slug: "calcas",
+    name: "Calças",
+    categoryId: "25",
+    description: "Corte reto e tecidos que respiram.",
+    chips: [{ label: "Corte reto", match: /reta/i }],
+  },
   { slug: "sale", name: "Sale", categoryId: null, description: "Peças selecionadas com até 50% off." },
 ];
 
 export const NAV = ["novidades", "shorts", "sungas", "camisas", "camisetas", "sale"]
+  .map((slug) => COLLECTIONS.find((c) => c.slug === slug))
+  .filter((c): c is Collection => Boolean(c));
+
+export function slugify(s: string) {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export interface MenuLink {
+  label: string;
+  href: string;
+}
+export interface MenuGroup {
+  title: MenuLink;
+  links: MenuLink[];
+}
+export interface MegaMenu {
+  label: string;
+  groups: MenuGroup[];
+  feature: { title: string; text: string; href: string; image: string };
+}
+
+/** A category column: the collection itself, its quick filters (PLP ?tipo=) and "Ver tudo". */
+function group(slug: string): MenuGroup {
+  const c = COLLECTIONS.find((x) => x.slug === slug);
+  if (!c) throw new Error(`Unknown collection ${slug}`);
+  const base = `/c/${c.slug}`;
+  return {
+    title: { label: c.name, href: base },
+    links: [...(c.chips ?? []).map((chip) => ({ label: chip.label, href: `${base}?tipo=${slugify(chip.label)}` })), { label: `Ver ${c.name.toLowerCase()}`, href: base }],
+  };
+}
+
+/** Desktop header: two mega menus between Novidades and Sale/Diário (mobile keeps a flat category strip). */
+export const MEGA_MENUS: MegaMenu[] = [
+  {
+    label: "Moda praia",
+    groups: [group("shorts"), group("sungas")],
+    feature: { title: "Verão 27", text: "Estampas novas que secam em minutos.", href: "/c/novidades", image: "/mare/cat-shorts.jpg" },
+  },
+  {
+    label: "Roupas",
+    groups: [group("camisas"), group("camisetas"), group("bermudas"), group("calcas")],
+    feature: { title: "Linho na orla", text: "Três jeitos de usar a camisa de linho.", href: "/blog/linho-na-orla", image: "/mare/editorial-linho.jpg" },
+  },
+];
+
+export const MOBILE_NAV = ["novidades", "shorts", "sungas", "camisas", "camisetas", "bermudas", "calcas", "sale"]
   .map((slug) => COLLECTIONS.find((c) => c.slug === slug))
   .filter((c): c is Collection => Boolean(c));
 
