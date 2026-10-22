@@ -28,8 +28,7 @@ export async function buyNow(form: FormData) {
   if (!variantId) return;
   const cartId = await ensureCartId();
   await commerce.cart.addItem(cartId, { variantId, quantity });
-  const { url } = await commerce.checkout.getCheckoutUrl(cartId);
-  redirect(url);
+  redirect(`/checkout/sacola/${cartId}`);
 }
 
 export async function updateQuantity(form: FormData) {
@@ -51,13 +50,12 @@ export async function closeBag() {
   revalidatePath("/", "layout");
 }
 
-/** Redirect mode: the cart goes to the native VTEX checkout, where payment happens. */
+/** Hands the cart to the Checkout layer (Versão Quick, served at /checkout on this same domain). */
 export async function goToCheckout() {
   const cartId = await currentCartId();
   if (!cartId) redirect("/carrinho");
   await setBagOpen(false);
-  const { url } = await commerce.checkout.getCheckoutUrl(cartId);
-  redirect(url);
+  redirect(`/checkout/sacola/${cartId}`);
 }
 
 /** Demo newsletter: no list is connected yet, so the address is not stored anywhere. */
