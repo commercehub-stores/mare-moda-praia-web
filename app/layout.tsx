@@ -43,6 +43,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                   {c.name}
                 </Link>
               ))}
+              <Link href="/blog" className="nav-blog">
+                Diário
+              </Link>
             </nav>
             <Link href="/" className="logo" aria-label="Maré Moda Praia, página inicial">
               <span className="logo-word">maré</span>
@@ -72,6 +75,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 {c.name}
               </Link>
             ))}
+            <Link href="/blog" className="nav-blog">
+              Diário
+            </Link>
           </nav>
         </SiteHeader>
 
@@ -86,6 +92,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div className="footer-col">
               <strong>Institucional</strong>
               <span>Sobre a Maré</span>
+              <Link href="/blog">Diário da Maré</Link>
               <span>Nossas lojas</span>
               <span>Trabalhe conosco</span>
               <span>Sustentabilidade</span>

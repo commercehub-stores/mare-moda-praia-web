@@ -61,5 +61,20 @@ export async function goToCheckout() {
 /** Demo newsletter: no list is connected yet, so the address is not stored anywhere. */
 export async function subscribe(form: FormData) {
   const email = text(form, "email");
-  redirect(email.includes("@") ? "/?newsletter=ok#newsletter" : "/#newsletter");
+  const back = text(form, "back");
+  const path = back.startsWith("/") && !back.startsWith("//") ? back.split(/[?#]/)[0] : "/";
+  redirect(email.includes("@") ? `${path}?newsletter=ok#newsletter` : `${path}#newsletter`);
+}
+
+/** "Adicionar os 3": every product of a blog post (one size each) in one go. */
+export async function addLook(form: FormData) {
+  const ids = form
+    .getAll("variantId")
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "")
+    .slice(0, 12);
+  if (!ids.length) return;
+  const cartId = await ensureCartId();
+  for (const variantId of ids) await commerce.cart.addItem(cartId, { variantId, quantity: 1 });
+  await setBagOpen(true);
+  revalidatePath("/", "layout");
 }
