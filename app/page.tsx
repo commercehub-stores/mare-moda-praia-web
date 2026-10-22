@@ -54,26 +54,12 @@ export default async function Home({ searchParams }: Props) {
 
   return (
     <>
-      <section className="hero page" aria-label="Coleção Verão 27">
+      <section className="hero" aria-label="Coleção Verão 27">
         <HeroVideo />
-        <p className="eyebrow">Coleção Verão 27</p>
-        <h1 className="display">
-          Verão sem
-          <br />
-          roteiro.
-        </h1>
-        <p>Estampas pintadas à mão, tecidos leves e o caimento de sempre.</p>
-        <div className="hero-ctas">
-          <Link href="/c/novidades" className="btn btn-coral">
-            Ver coleção
-          </Link>
-          <Link href="/c/shorts" className="btn btn-outline-light">
-            Shorts estampados
-          </Link>
-        </div>
-        <span className="hero-scroll" aria-hidden="true">
-          ROLE ↓
-        </span>
+        <h1 className="sr-only">Maré Moda Praia · Coleção Verão 27</h1>
+        <a href="#vitrine" className="hero-scroll" aria-label="Rolar para os destaques">
+          <span />
+        </a>
       </section>
 
       <section className="benefits page" aria-label="Benefícios">

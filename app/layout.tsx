@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { openBag } from "@/app/actions.ts";
 import { BagDrawer } from "@/components/bag-drawer.tsx";
+import { SiteHeader } from "@/components/site-header.tsx";
 import { BAG_OPEN_COOKIE, currentCart } from "@/lib/cart.ts";
 import { quickConfig } from "@/lib/config.ts";
 import { NAV } from "@/lib/mare.ts";
@@ -34,7 +35,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <span>5% off no Pix</span>
           <span>Troca fácil em 30 dias</span>
         </div>
-        <header className="header">
+        <SiteHeader>
           <div className="header-row page">
             <nav className="nav" aria-label="Categorias">
               {NAV.map((c) => (
@@ -72,7 +73,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               </Link>
             ))}
           </nav>
-        </header>
+        </SiteHeader>
 
         <main>{children}</main>
 
